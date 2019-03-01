@@ -1,0 +1,24 @@
+#!/bin/bash
+# Update the OS.
+sudo apt update
+
+# Install the NFS server.
+sudo apt install nfs-kernel-server
+
+# Create public and private directories.
+sudo mkdir /public
+sudo mkdir /private
+sudo chmod 755 /public
+sudo chmod 777 /private
+
+echo '/public  *(ro,sync,no_subtree_check)' >> /etc/exports
+echo Enter the IP address of an NFS client:
+read -r "nfs_client_ip"
+echo '/private '$(nfs_client_ip)'(rw,sync,no_subtree_check)' >> /etc/exports
+sudo exportfs -arvf
+
+nfs_server_array=('enable' 'start' '--no-pager status')
+for i in ${nfs_server_array[@]}
+do
+	sudo systemctl $i nfs-kernel-server
+done
